@@ -18,5 +18,37 @@ pipeline {
       }
     }
 
+    stage('run the app') {
+      steps {
+        sh 'npm start &'
+      }
+    }
+
+    stage('test the app') {
+      steps {
+        sh 'curl localhost:8080'
+      }
+    }
+
+    stage('kill the app') {
+      steps {
+        sh ' pkill -f node'
+      }
+    }
+
+    stage('Package') {
+      steps {
+        sh 'zip -r package.zip .'
+        archiveArtifacts(artifacts: 'package.zip', onlyIfSuccessful: true)
+        cleanWs(cleanWhenSuccess: true)
+      }
+    }
+
+    stage('Notify_Slack') {
+      steps {
+        slackSend(channel: 'dd_devops')
+      }
+    }
+
   }
 }
